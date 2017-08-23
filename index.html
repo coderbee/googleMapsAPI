@@ -1,0 +1,153 @@
+<!-- This is the corresponding "starter code" for 04_Hello Map in Udacity and Google's Maps
+API Course, Lesson 1 -->
+<html>
+ <head>
+ <!-- styles put here, but you can include a CSS file and reference it instead! -->
+   <style type="text/css">
+     html, body { height: 100%; margin: 0; padding: 0; }
+     #map { height: 80%; width: 80% }
+   </style>
+ </head>
+
+
+ <body>
+   <!--: Create a place to put the map in the HTML-->
+   <div class="container">
+	<div class="options box">
+		<hi> Find your New Home!</h1>
+		<div>
+			<input id="show-listings" type="button" value="Show Listings">
+			<input id="hide-listings" type="button" value="Hide Listings">
+		</div>
+	</div>
+   <div id="map"></div>
+   </div>
+
+
+   <script>
+     //  Create a map variable
+   	var map1;
+	//blank array for the markers
+	var bigMarkers= [];
+
+     //  Complete the following function to initialize the map
+     function initMap() {
+       //  use a constructor to create a new map JS object. You can use the coordinates
+       // we used, 40.7413549, -73.99802439999996 or your own!
+	map1 = new google.maps.Map(document.getElementById('map'), {
+		center: {lat:40.7413549, lng: -73.9980244},
+		zoom: 16
+		});
+
+	//Code to make a mark on the map (the red dot )
+	var tribeca = {lat: 40.719526, lng: -74.0089934}; 
+	var marker = new google.maps.Marker({	//Marker instance
+			position: tribeca,	//where to appear
+			map:map1,		//map instance to use
+			title:'Not part of BigMarkers!!'
+			});
+
+	//Adding an infowindow. 
+	var infoWindow = new google.maps.InfoWindow ({
+		content: 'Guess you clicked on the red dot after all!' + 'Good'});
+	//Unlike a Marker, infoWindow isnt displayed by default
+	//Use a listener function on marker for that
+	marker.addListener('click', function(){  //wait for the click, then to the function()
+		infoWindow.open(map1,marker);
+		});
+
+
+	//NEW TASK...
+	//Lets add a bunch of points on the map!
+	//the locations are stored in an array below, typically they would come from the DATABASE
+	var bigLocations = [
+			{title: 'Park Ave Penthouse', 		location: {lat: 40.7713024, lng: -73.9632393}},
+			{title: 'Chelsea Loft', 		location: {lat: 40.444883, lng: -73.9949465}},
+			{title: 'Union Square floor plan', 	location: {lat: 40.7347062, lng: -73.9895759}},
+			{title: 'East Village Hip Studio', 	location: {lat: 40.7281777, lng: -73.984377}},
+			{title: 'Tribeca Artsy Bachelorpad', 	location: {lat: 40.7195264, lng: -73.0089934}},
+		];
+		
+	var largeInfoWindow = new google.maps.InfoWindow();
+
+	//var bounds = new google.maps.LatLngBounds(); //Upgrade! This will ne done in the showlistings finction now.
+
+	document.getElementById('show-listings').addEventListener('click', showListings);
+	document.getElementById('hide-listings').addEventListener('click', hideListings);
+
+	//Create an array of markers on initialization by looping through 
+	for (var i = 0 ; i < bigLocations.length; i++) {
+		var position = bigLocations[i].location;
+		var title = bigLocations[i].title;
+		//Create a marker , put it into the marker array
+		var bigMarker = new google.maps.Marker ({
+			//map: map1,  //Upgrade! This will ne done in the showlistings finction now.
+			position: position,
+			title: title,
+			animation: google.maps.Animation.DROP,
+			id: i
+			});
+		// Push marker into array of markers
+		bigMarkers.push(bigMarker);
+		// Extend the bounds for every marker
+		//bounds.extend(bigMarker.position);//Upgrade! This will ne done in the showlistings finction now. 
+
+		// Create an onClick event to open an infowindow at each marker
+		bigMarker.addListener('click', function(){
+		populateInfoWindow(this, largeInfoWindow);
+		});
+	   }
+     }
+
+
+	//This function will loop through the markers and show the listings
+
+
+	function showListings () { 
+	var bounds = new google.maps.LatLngBounds(); 
+       	// Extend the boundaries of the map for each marker and display the marker
+	for ( var i = 0; i< bigMarkers.length; i++) {
+		bigMarkers[i].setMap(map1);
+		bounds.extend(bigMarkers[i].position);
+		}
+	 	map1.fitBounds(bounds);
+	}
+
+	function hideListings (){
+		for (var i = 0; i < bigMarkers.length; i++){
+		bigMarkers[i].setMap(null);
+		}
+	}
+
+
+
+	//Populate infowindow when a marker is clicked. Only one Infowindow is present on the map 
+	// depending on which marker was clicked 
+	
+	function populateInfoWindow(marker, infoWindow) {
+		//Check if this marker infowindow already open
+		if (infoWindow.marker !=marker) {
+			infoWindow.marker = marker;
+			infoWindow.setContent('<div>' + marker.title + '</div>');
+			infoWindow.open(map1, marker);
+			// Make sure marker property is cleared if the infowindow is closed
+			infoWindow.addListener('closeclick', function(){
+			//infoWindow.setMarker(null); //Looks like this is Deprecated?
+			});
+		}
+     	}
+
+
+
+     
+   </script>
+
+
+   <!--: Load the JS API ASYNCHRONOUSLY below.-->
+   <script async defer
+	src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB31xbu_uJs6BQUcLobhR0pzf_fPxnDMt8&v=3&callback=initMap"
+	type="text/javascript">
+	
+   </script>
+ </body>
+</html>
